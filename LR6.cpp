@@ -119,7 +119,8 @@ int main()
 {
     setlocale(LC_ALL, "Russian");
     srand(time(NULL));
-    std::vector<Student> Check;
+    std::vector<Student> Check1;
+    std::vector<Student> Check2;
     std::vector<std::string> SubjectData = {"Алгебра", "Матанализ", "Физика", "История", "Психология", "Инжграф", "Информатика", "Политология", "Физкультура", "Экономика"};
     std::vector<std::string> StudentData = {"Кожевникова Ника Ипполитовна", "Счастливцева Дарья Всеволодовна", "Матвеева Изольда Павеловна", "Шерстова Татьяна Давидовна", "Невшупа Яна Данилевна", "Колесников Андрей Денисович", "Курдиков Кирилл Олегович", "Ямлиханов Рубен Елисеевич", "Нагиев Моисей Назарович", "Лобза Валерьян Ипатиевич"};
     int x = 0;
@@ -164,11 +165,11 @@ int main()
     }
     std::cout << std::endl;
     PrintInfo(Group);
-    /*WriteToFile("Hello1.txt", Group);
-    ReadFromFile("Hello1.txt", Check);
-    PrintInfo(Check);*/
+    WriteToFile("Hello1.txt", Group);
+    ReadFromFile("Hello1.txt", Check1);
+    PrintInfo(Check1);
     WriteToFileBin("Hello2.txt", Group);
-    ReadFromFileBin("Hello2.txt", Check);
-    PrintInfo(Check);
+    ReadFromFileBin("Hello2.txt", Check2);
+    PrintInfo(Check2);
     return 0;
 }
