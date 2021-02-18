@@ -6,15 +6,16 @@
 #include <algorithm>
 #include <fstream>
 
-struct Discipline
-{
-    std::string Subject;
-    int Mark;
-};
+
 
 struct Student
 {
     std::string FSM;
+    struct Discipline
+    {
+        std::string Subject;
+        int Mark;
+    };
     Discipline Stats[6];
 };
 
@@ -39,7 +40,7 @@ void PrintInfo(std::vector<Student> &Vec)
 
 std::ofstream &operator<<(std::ofstream &file, std::vector<Student> &Vec) //Запись в файл
 {
-    for (Student &St : Vec)
+    for (Student& St : Vec)
     {
         file << "Студент: " << St.FSM << std::endl;
         for (int i = 0; i < 6; i++)
@@ -53,8 +54,9 @@ std::ofstream &operator<<(std::ofstream &file, std::vector<Student> &Vec) //За
 
 std::ifstream &operator>>(std::ifstream &file, std::vector<Student> &Vec) //Чтение из файла
 {
+    Student St;
     std::string buff;
-    for (Student &St : Vec)
+    while (!file.eof())
     {
         file.ignore(9);
         std::getline(file, St.FSM);
@@ -66,7 +68,9 @@ std::ifstream &operator>>(std::ifstream &file, std::vector<Student> &Vec) //Чт
             std::getline(file, buff);
             St.Stats[i].Mark = std::stoi(buff);
         }
+        Vec.push_back(St);
     }
+    Vec.pop_back();
     return file;
 }
 
@@ -88,29 +92,41 @@ void WriteToFile(std::string Name, std::vector<Student> &Vec)
 
 void ReadFromFileBin(std::string Name, std::vector<Student> &Vec)
 {
+    unsigned int buffer = 0;
     std::ifstream file(Name, std::ios::binary);
-    int a = 0;
-    for (Student &St : Vec)
+    file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
+    Vec.resize(buffer);
+    for (Student St : Vec)
     {
-        file.read(reinterpret_cast<char*>(&St.FSM), sizeof(St.FSM));
+        file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
+        St.FSM.resize(buffer); 
+        file.read(St.FSM.data(), buffer);//???
         for (int i = 0; i < 6; i++)
         {
-            file.read(reinterpret_cast<char*>(&St.Stats[i].Subject), sizeof(St.Stats[i].Subject));
-            file.read(reinterpret_cast<char*>(&St.Stats[i].Mark), sizeof(St.Stats[i].Mark));
+            file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
+            St.Stats[i].Subject.resize(buffer);
+            file.read(St.Stats[i].Subject.data(), buffer);
+            file.read(reinterpret_cast<char*>(&St.Stats[i].Mark), sizeof(int));
         }
     }
 }
 
 void WriteToFileBin(std::string Name, std::vector<Student> &Vec)
 {
+    unsigned int buffer = Vec.size();
     std::ofstream file(Name, std::ios::binary);
-    for (Student& St : Vec)
+    file.write(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
+    for (Student &St : Vec)
     {
-        file.write(reinterpret_cast<char*>(&St.FSM), sizeof(St.FSM));
+        buffer = St.FSM.length();
+        file.write(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
+        file.write(St.FSM.data(), buffer);
         for (int i = 0; i < 6; i++)
         {
-            file.write(reinterpret_cast<char*>(&St.Stats[i].Subject), sizeof(St.Stats[i].Subject));
-            file.write(reinterpret_cast<char*>(&St.Stats[i].Mark), sizeof(St.Stats[i].Mark));
+            buffer = St.Stats[i].Subject.length();
+            file.write(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
+            file.write(St.Stats[i].Subject.data(), buffer);
+            file.write(reinterpret_cast<char*>(&St.Stats[i].Mark), sizeof(int));
         }
     }
 }
@@ -121,13 +137,13 @@ int main()
     srand(time(NULL));
     std::vector<Student> Check1;
     std::vector<Student> Check2;
-    std::vector<std::string> SubjectData = {"Алгебра", "Матанализ", "Физика", "История", "Психология", "Инжграф", "Информатика", "Политология", "Физкультура", "Экономика"};
-    std::vector<std::string> StudentData = {"Кожевникова Ника Ипполитовна", "Счастливцева Дарья Всеволодовна", "Матвеева Изольда Павеловна", "Шерстова Татьяна Давидовна", "Невшупа Яна Данилевна", "Колесников Андрей Денисович", "Курдиков Кирилл Олегович", "Ямлиханов Рубен Елисеевич", "Нагиев Моисей Назарович", "Лобза Валерьян Ипатиевич"};
+    std::vector<std::string> SubjectData = { "Алгебра", "Матанализ", "Физика", "История", "Психология", "Инжграф", "Информатика", "Политология", "Физкультура", "Экономика" };
+    std::vector<std::string> StudentData = { "Кожевникова Ника Ипполитовна", "Счастливцева Дарья Всеволодовна", "Матвеева Изольда Павеловна", "Шерстова Татьяна Давидовна", "Невшупа Яна Данилевна", "Колесников Андрей Денисович", "Курдиков Кирилл Олегович", "Ямлиханов Рубен Елисеевич", "Нагиев Моисей Назарович", "Лобза Валерьян Ипатиевич" };
     int x = 0;
     int k = 0;
     int N = 0;
     bool isFailed;
-    std::cout << "Введите количество студентов(до 10): ";
+    std::cout << "Введите количество студентов(до 10 включительно): ";
     std::cin >> N;
     std::cout << std::endl;
     std::vector<Student> Group(N);
@@ -146,6 +162,8 @@ int main()
             St.Stats[i].Mark = (rand() % 4) + 2;
         }
     }
+
+
     std::sort(Group.begin(), Group.end(), comp);
     std::cout << "----Отсортировано----" << std::endl;
     for (Student &St : Group)
@@ -153,7 +171,10 @@ int main()
         std::cout << St.FSM << std::endl;
     }
     std::cout << std::endl;
+
+
     std::cout << "----Студенты с хотя бы одним неуд----" << std::endl;
+    k = 0;
     for (Student &St : Group)
     {
         isFailed = false;
@@ -161,15 +182,31 @@ int main()
         {
             if (St.Stats[i].Mark == 2) isFailed = true;
         }
-        if (isFailed) std::cout << St.FSM << std::endl;
+        if (isFailed)
+        {
+            k++;
+            std::cout << k << "." << St.FSM << std::endl;
+        }
     }
+    std::cout << "Всего студентов с неуд: " << k << std::endl;
     std::cout << std::endl;
+
+
+    std::cout << "----Проверка----" << std::endl;
     PrintInfo(Group);
+    std::cout << std::endl;
+
+    std::cout << "----Проверка чтения и записи----" << std::endl;
     WriteToFile("Hello1.txt", Group);
     ReadFromFile("Hello1.txt", Check1);
     PrintInfo(Check1);
+    std::cout << std::endl << std::endl;
+
+
+    std::cout << "----Проверка чтения и записи в бинарном режиме----" << std::endl;
     WriteToFileBin("Hello2.txt", Group);
     ReadFromFileBin("Hello2.txt", Check2);
     PrintInfo(Check2);
+    std::cout << std::endl << std::endl;
     return 0;
 }
