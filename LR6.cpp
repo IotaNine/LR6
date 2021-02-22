@@ -100,7 +100,7 @@ void ReadFromFileBin(std::string Name, std::vector<Student> &Vec)
     {
         file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
         St.FSM.resize(buffer); 
-        file.read(St.FSM.data(), buffer);//???
+        file.read(St.FSM.data(), buffer);
         for (int i = 0; i < 6; i++)
         {
             file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
