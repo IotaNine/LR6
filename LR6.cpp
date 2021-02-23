@@ -142,7 +142,6 @@ int main()
     int x = 0;
     int k = 0;
     int N = 0;
-    bool isFailed;
     std::cout << "Введите количество студентов(до 10 включительно): ";
     std::cin >> N;
     std::cout << std::endl;
@@ -177,15 +176,13 @@ int main()
     k = 0;
     for (Student &St : Group)
     {
-        isFailed = false;
         for (int i = 0; i < 6; i++)
         {
-            if (St.Stats[i].Mark == 2) isFailed = true;
-        }
-        if (isFailed)
-        {
-            k++;
-            std::cout << k << "." << St.FSM << std::endl;
+            if (St.Stats[i].Mark == 2)
+            {
+                k++;
+                std::cout << k << "." << St.FSM << std::endl;
+            }
         }
     }
     std::cout << "Всего студентов с неуд: " << k << std::endl;
