@@ -96,16 +96,16 @@ void ReadFromFileBin(std::string Name, std::vector<Student> &Vec)
     std::ifstream file(Name, std::ios::binary);
     file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
     Vec.resize(buffer);
-    for (Student St : Vec)
+    for (Student &St : Vec)
     {
         file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
         St.FSM.resize(buffer); 
-        file.read(St.FSM.data(), buffer);
+        file.read(const_cast<char*>(St.FSM.data()), buffer);
         for (int i = 0; i < 6; i++)
         {
             file.read(reinterpret_cast<char*>(&buffer), sizeof(unsigned int));
             St.Stats[i].Subject.resize(buffer);
-            file.read(St.Stats[i].Subject.data(), buffer);
+            file.read(const_cast<char*>(St.Stats[i].Subject.data()), buffer);
             file.read(reinterpret_cast<char*>(&St.Stats[i].Mark), sizeof(int));
         }
     }
